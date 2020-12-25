@@ -6,6 +6,8 @@ defmodule Hangman.Game do
     used: MapSet.new()
   )
 
+  @me __MODULE__
+
   def new_game(word) do
     %Hangman.Game{
       letters: word |> String.codepoints()
@@ -23,6 +25,15 @@ defmodule Hangman.Game do
   def make_move(game, guess) do
     accept_move(game, guess, MapSet.member?(game.used, guess))
     |> return_with_tally()
+  end
+
+  def tally(%@me{game_state: :lost} = game) do
+    %{
+      game_state: game.game_state,
+      turns_left: game.turns_left,
+      used: game.used |> MapSet.to_list() |> Enum.sort(), 
+      letters: game.letters
+    }
   end
 
   def tally(game) do
@@ -55,7 +66,9 @@ defmodule Hangman.Game do
   end
 
   defp score_guess(game = %{turns_left: 1}, _not_good_guess = false) do
-    Map.put(game, :game_state, :lost)
+    game
+    |> Map.put(:game_state, :lost)
+    |> Map.put(:turns_left, 0)
   end
 
   defp score_guess(game = %{turns_left: turns_left}, _not_good_guess = false) do

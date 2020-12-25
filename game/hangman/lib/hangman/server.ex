@@ -15,9 +15,12 @@ defmodule Hangman.Server do
     GenServer.call(pid, {:make_move, guess})
   end
 
+  def tally(pid) do
+    GenServer.call(pid, {:tally})
+  end
 
   #########
-  
+
   def handle_call({:make_move, guess}, _from, game) do
     Game.make_move(game, guess)
     |> reply_call()
@@ -27,7 +30,6 @@ defmodule Hangman.Server do
     {game, Game.tally(game)}
     |> reply_call()
   end
-
 
   defp reply_call({game, tally}) do
     {:reply, tally, game}
